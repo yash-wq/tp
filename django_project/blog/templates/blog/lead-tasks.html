@@ -1,0 +1,35 @@
+{% extends "blog/base.html" %}
+{% block content %}
+
+ <article class="media content-section">
+<!--          <div class="media-body">-->
+<!--            <div class="article-metadata">-->
+<!--              <small >Projects:</small>-->
+<!--            </div>-->
+<!--              {% for post in available_projects %}-->
+
+<!--            <h2><a class="article-title" href="#">{{ post.project_title }}</a></h2>-->
+<!--              {% endfor %}-->
+
+<!--&lt;!&ndash;            <p class="article-content">{{ post.project_description }}</p>&ndash;&gt;-->
+<!--&lt;!&ndash;            <small class="text-muted">{{ post.deadline }}</small><br>&ndash;&gt;-->
+<!--&lt;!&ndash;            <small class="text-muted">{{ post.lead }}</small><br>&ndash;&gt;-->
+<!--&lt;!&ndash;              <small class="text-muted">{{ post.username }}</small><br>&ndash;&gt;-->
+
+<!--          </div>-->
+     <form action = 'test' method="POST">
+         {% csrf_token %}
+<!--  <label for="cars">Choose a car:</label>-->
+<!--           <select name="cars" id="cars">-->
+<!--       {% for post in available_projects %}-->
+<!--    <option name= 'selected_pro_name' placeholder = 'selected_pro_name'>{{ post.project_title }}</option>-->
+<!--{% endfor %}-->
+<!--  </select>-->
+<!--  <br><br>-->
+<!--  <input type="submit" value="Submit">-->
+
+  <input type="text" id="lname" name="lname"><br><br>
+  <input type="submit" value="Submit">
+</form>
+        </article>
+{% endblock content %}

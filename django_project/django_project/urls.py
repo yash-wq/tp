@@ -19,9 +19,10 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from users import views as user_views
-
+from blog import views as blog_views
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # path(r'^lead/(?P<id>\d+)', blog_views.post_detail, name="post_detail"),
     # path('register/', user_views.register, name='register'),
     # path('profile/', user_views.profile, name='profile'),
     # path('login/', auth_views.LoginView.as_view(template_name='blog/login.html'), name='login'),

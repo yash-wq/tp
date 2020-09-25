@@ -15,7 +15,6 @@ from datetime import date
 client=boto3.resource('dynamodb',region_name='us-east-2')
 
 manager_table = client.Table('Manager')
-lead_ids = {'Anand':'0003','Jimmy':'0006'}
 result = manager_table.scan()
 # print(result)
 data = result['Items']
@@ -105,6 +104,18 @@ def home(request):
         # 'posts': Post.objects.all()
     }
     return render(request, 'blog/home.html', context)
+def get_post_by_srno(id):
+    manager_table = client.Table('Manager')
+
+    result = manager_table.scan()
+    data = result['Items']
+    while 'LastEvaluatedKey' in result:
+        result = manager_table.scan(ExclusiveStartKey=result['LastEvaluatedKey'])
+        data.extend(result['Items'])
+    for i in data:
+        if i['sr_no'] == str(id):
+            return (i)
+
 
 class PostListView(ListView):
 
@@ -113,8 +124,24 @@ class PostListView(ListView):
     context_object_name = 'posts'
     order = ['-date_posted']
 
+
+# def post_detail(request, id, slug):
+    post_list=[]
+    post = get_post_by_srno(id)
+    # context={
+    #     'post':post,
+    # }
+    post_list.append(post)
+#     return render(request, 'blog/post_detail2.html' ,{'post':post_list})
+
+
+
 class PostDetailView(DetailView):
-    model = Post
+    post_list=[]
+    post = get_post_by_srno(id)
+
+    post_list.append(post)
+    model = post_list
 
 
 def push_to_db(id,project_name,description,deadline,lead_assigned):
@@ -150,7 +177,7 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 
         push_to_db(id_number, project_title, project_description, deadline, lead_assigned)
         return redirect('manager')
-        return super().form_valid(form)
+        # return super().form_valid(form)
 
 class PostUpdateView(LoginRequiredMixin,UserPassesTestMixin, UpdateView):
     model = Post
@@ -173,12 +200,16 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         if self.request.user == post.author:
             return True
         return False
+
+lead_ids = {'Anand':'0003','Jimmy':'0006'}
+
 def find_lead_id(username):
     for i in lead_ids:
-        if i==username:
-            return i[username]
-        else:
-            return 'invalid'
+
+        if (i == username):
+            return (lead_ids[username])
+
+
 @login_required(login_url='blog-login')
 def about(request):
     return render(request, 'blog/about.html', {'title': 'About'})
@@ -194,7 +225,20 @@ def tasks_from_manager(lead_id):
         data.extend(result['Items'])
     for i in data:
         if i['Lead_assigned_id'] == lead_id:
-            projects_for_lead.append(i['Project_name'])
+
+            project_title = i['Project_name']
+            project_description = i['description']
+            manager_id = i['id']
+            deadline = i['deadline']
+            issue_date = i['issue_date']
+            dict_manager = {
+                'project_title':project_title,
+                'project_description':project_description,
+                'manager_id':manager_id,
+                'deadline':deadline,
+                'issue_date':issue_date,
+            }
+            projects_for_lead.append(dict_manager)
 
     if len(projects_for_lead) == 0:
         return ['No projects for you']
@@ -202,12 +246,35 @@ def tasks_from_manager(lead_id):
         return projects_for_lead
 @login_required(login_url='blog-login')
 def lead(request):
-    username = request.POST.get('username')
-    print("userrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr",username)
+
+
     id1 = find_lead_id(username)
-    project_for_lead=tasks_from_manager('0006')
-    print("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh",project_for_lead)
-    return render(request, 'blog/lead.html', {'available_projects':project_for_lead})
+    project_for_lead=tasks_from_manager(id1)
+    print(project_for_lead)
+    # global project_for_lead
+
+    for i in project_for_lead:
+        print(i)
+        tuple_element=(
+            (str(i['project_title']) , i['project_title']),
+        )
+    return render(request, 'blog/lead.html', {'available_projects':project_for_lead,'username':username})
+
+def lead_tasks(request):
+    # if request.method == 'POST':
+    #     username = request.POST.get('lname')
+    # # selected_pro_name = request.POST.get('lname')
+    # print('proprop-----------------------------------------------------------',username)
+    id1 = find_lead_id(username)
+    project_for_lead=tasks_from_manager(id1)
+
+    return render(request, 'blog/lead-tasks.html', {'available_projects':project_for_lead})
+
+def test(request):
+    pro = request.POST.get('lname')
+    print('lnlnlnlnlnlnlnlnlnlnlnlnlnlnlnlnlnlnlnlnl',pro)
+    return render(request, 'blog/test.html')
+
 
 @login_required(login_url='blog-login')
 def resource(request):
@@ -220,9 +287,13 @@ def Welcome(request):
 
 @unauthenticated_user
 def loginPage(request):
+
+    global username
+
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        print('userrrrrrrrrrrrrrrrrrrrrrrrrrrrrnameeeeeeeeeeeeeeeeeeeeeeeeeeeeee',username)
         user = authenticate(request, username = username, password = password)
         if user is not  None:
             login(request, user)
@@ -235,7 +306,6 @@ def loginPage(request):
                 return redirect('blog-resource')
         else: 
             messages.info(request, 'Username or Password is Incorrect')
-
     return render(request, 'blog/login.html', {'title': 'Login'})
 
 @unauthenticated_user

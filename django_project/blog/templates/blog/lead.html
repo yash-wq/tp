@@ -1,24 +1,25 @@
 {% extends "blog/base.html" %}
 {% block content %}
-
+<h3 >Projects for {{ username }}</h3>
+            <div>
+                <a class="btn btn-secondary btn-sm mt-1 mb-1 " href="{% url 'lead-tasks' %}" name={{index}} >Tasks</a>
+<!--                <a class="btn btn-danger btn-sm mt-1 mb-1 " href="#" name={{index}} >Delete</a>-->
+            </div>
 {% for post in available_projects %}
-
         <article class="media content-section">
           <div class="media-body">
             <div class="article-metadata">
-              <a class="mr-2" href="#">{{ post.idno }}</a>
-              <small class="text-muted">{{ post.date_posted }}</small>
+              <a class="mr-2" href="#">By {{ post.manager_id }}</a>
+              <small class="text-muted">{{ post.issue_date }}</small>
             </div>
-            <h2><a class="article-title" href="#">{{ post.Project_name }}</a></h2>
-<!--            <p class="article-content">{{ post.description }}</p>-->
-<!--            <small class="text-muted">{{ post.dline }}</small><br>-->
+            <h2><a class="article-title" href="#">{{ post.project_title }}</a></h2>
+            <p class="article-content">{{ post.project_description }}</p>
+            <small class="text-muted">{{ post.deadline }}</small><br>
 <!--            <small class="text-muted">{{ post.lead }}</small><br>-->
 <!--              <small class="text-muted">{{ post.username }}</small><br>-->
-            <div>
-                <a class="btn btn-secondary btn-sm mt-1 mb-1 " href="#" name={{index}} >Update</a>
-                <a class="btn btn-danger btn-sm mt-1 mb-1 " href="#" name={{index}} >Delete</a>
-            </div>
+
           </div>
         </article>
 {% endfor %}
+
 {% endblock content %}
